@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幻灯片分析 - 实时查看</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- 添加KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <!-- 添加Marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    <!-- 添加KaTeX JS -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <!-- 确保KaTeX全局函数可用 -->
+    <script>
+        // 确保renderMathInElement函数全局可用
+        window.renderMathInElement = window.renderMathInElement || katex.renderMathInElement;
+    </script>
+    <!-- 添加Markdown渲染器 -->
+    <script src="{{ url_for('static', filename='js/markdown-renderer.js') }}"></script>
+    <style>
+        #loading-indicator {
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e9ecef;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .status-text {
+            font-weight: bold;
+        }
+        
+        .progress-info {
+            display: flex;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>幻灯片翻译与讲解 - 实时分析</h1>
+            <p><a href="/" class="back-link">返回首页</a></p>
+        </header>
+        
+        <main>
+            <div class="status-bar">
+                <div class="status-text" id="status-text">正在处理...</div>
+                <div class="progress-info">
+                    <span>已处理: <span id="processed-count">0</span>/<span id="total-count">0</span></span>
+                </div>
+            </div>
+            
+            <div id="loading-indicator">
+                <p>正在加载幻灯片分析结果...</p>
+                <div class="progress-bar-container">
+                    <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="results-container" id="results-container">
+                <!-- 这里将动态添加幻灯片内容 -->
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2025 幻灯片翻译与讲解系统</p>
+        </footer>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sessionId = '{{ session_id }}';
+            const resultsContainer = document.getElementById('results-container');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const progressBar = document.getElementById('progress-bar');
+            const statusText = document.getElementById('status-text');
+            const processedCount = document.getElementById('processed-count');
+            const totalCount = document.getElementById('total-count');
+            
+            let lastProcessedCount = 0;
+            let isCompleted = false;
+            
+            // 创建幻灯片元素
+            function createSlideElement(slide) {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = 'slide-row';
+                slideDiv.id = `slide-${slide.number}`;
+                
+                // 修改图像URL，确保不使用相对路径
+                const imageUrl = `/results/${sessionId}/images/${slide.image.split('/').pop()}`;
+                
+                slideDiv.innerHTML = `
+                    <div class="slide-number">${slide.number}</div>
+                    <div class="slide-image">
+                        <img src="${imageUrl}" alt="幻灯片 ${slide.number}">
+                    </div>
+                    <div class="slide-description">
+                        <div class="description-content">
+                            ${slide.description}
+                        </div>
+                    </div>
+                `;
+                
+                // 渲染Markdown和数学公式
+                const descriptionContent = slideDiv.querySelector('.description-content');
+                if (descriptionContent && window.markdownRenderer) {
+                    window.markdownRenderer.renderMarkdown(slide.description, descriptionContent);
+                }
+                
+                return slideDiv;
+            }
+            
+            // 更新进度状态
+            function updateStatus() {
+                fetch(`/status/${sessionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 更新进度信息
+                    totalCount.textContent = data.total_images;
+                    processedCount.textContent = data.processed_images;
+                    
+                    // 更新状态文本
+                    if (data.error) {
+                        statusText.textContent = `处理错误: ${data.error}`;
+                        loadingIndicator.style.display = 'none';
+                        clearInterval(statusInterval);
+                        return;
+                    }
+                    
+                    if (data.status === 'converting') {
+                        statusText.textContent = '正在转换为图片...';
+                    } else {
+                        statusText.textContent = '正在分析幻灯片...';
+                    }
+                    
+                    // 更新进度条
+                    const progress = (data.processed_images / Math.max(1, data.total_images)) * 100;
+                    progressBar.style.width = `${progress}%`;
+                    
+                    // 如果已完成，停止更新
+                    if (data.completed) {
+                        isCompleted = true;
+                        statusText.textContent = '处理完成';
+                        loadingIndicator.style.display = 'none';
+                        clearInterval(statusInterval);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取状态时出错:', error);
+                });
+            }
+            
+            // 获取部分结果
+            function getPartialResults() {
+                fetch(`/partial-results/${sessionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 检查是否有新的处理结果
+                    if (data.slides.length > lastProcessedCount) {
+                        // 只添加新的幻灯片
+                        for (let i = lastProcessedCount; i < data.slides.length; i++) {
+                            const slideElement = createSlideElement(data.slides[i]);
+                            resultsContainer.appendChild(slideElement);
+                        }
+                        
+                        lastProcessedCount = data.slides.length;
+                    }
+                })
+                .catch(error => {
+                    console.error('获取结果时出错:', error);
+                });
+            }
+            
+            // 定期更新状态和结果
+            const statusInterval = setInterval(updateStatus, 2000);
+            const resultsInterval = setInterval(getPartialResults, 3000);
+            
+            // 初始获取一次状态和结果
+            updateStatus();
+            getPartialResults();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# PPT Study 依赖项
+
+# Web 框架
+flask>=2.0.0
+werkzeug>=2.0.0
+
+# 文件处理
+pdf2image>=1.16.0
+pillow>=9.0.0
+pathlib>=1.0.1
+
+# API 客户端
+openai>=1.0.0
+
+# 系统工具
+python-dotenv>=0.19.0
+requests>=2.27.0
+
+# 图像处理
+numpy>=1.20.0
+
+# 并发处理
+threading
+uuid
+
+# 其他工具
+mimetypes
+base64

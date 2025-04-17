@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幻灯片翻译与讲解</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>幻灯片翻译与讲解</h1>
+            <p>上传PPT、PPTX或PDF文件，获取中文翻译和知识点讲解</p>
+        </header>
+
+        <main>
+            <div class="upload-section">
+                <form id="upload-form" enctype="multipart/form-data">
+                    <div class="file-input-container">
+                        <input type="file" id="file-input" name="file" accept=".ppt,.pptx,.pdf">
+                        <label for="file-input" class="file-label">
+                            <span class="label-text">选择文件</span>
+                        </label>
+                        <span id="file-name" class="file-name">未选择文件</span>
+                    </div>
+                    <button type="submit" class="upload-button">上传并分析</button>
+                </form>
+            </div>
+
+            <div id="progress-container" class="progress-container" style="display: none;">
+                <h2>正在处理...</h2>
+                <div class="progress-info">
+                    <div class="progress-item">
+                        <span>转换为图片:</span>
+                        <span id="images-count">0</span>
+                    </div>
+                    <div class="progress-item">
+                        <span>生成描述:</span>
+                        <span id="descriptions-count">0</span>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
+                <p id="progress-message">正在上传文件...</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 幻灯片翻译与讲解系统</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

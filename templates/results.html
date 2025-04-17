@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析结果 - 幻灯片翻译与讲解</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- 添加KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <!-- 添加Marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    <!-- 添加KaTeX JS -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <!-- 添加Markdown渲染器 -->
+    <script src="{{ url_for('static', filename='js/markdown-renderer.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>幻灯片翻译与讲解 - 分析结果</h1>
+            <p><a href="/" class="back-link">返回首页</a></p>
+        </header>
+
+        <main>
+            <div class="results-container">
+                {% for slide in slides %}
+                <div class="slide-row" id="slide-{{ slide.number }}">
+                    <div class="slide-number">{{ slide.number }}</div>
+                    <div class="slide-image">
+                        <img src="{{ slide.image }}" alt="幻灯片 {{ slide.number }}">
+                    </div>
+                    <div class="slide-description">
+                        <div class="description-content">
+                            {{ slide.description|safe }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2023 幻灯片翻译与讲解系统</p>
+        </footer>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 处理所有Markdown内容
+            if (window.markdownRenderer) {
+                window.markdownRenderer.processAllMarkdownElements();
+            }
+        });
+    </script>
+</body>
+</html>
