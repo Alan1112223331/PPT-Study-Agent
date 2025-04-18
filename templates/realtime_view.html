@@ -5,20 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>幻灯片分析 - 实时查看</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- 添加KaTeX CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <!-- 添加Marked.js -->
     <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
-    <!-- 添加KaTeX JS -->
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-    <!-- 确保KaTeX全局函数可用 -->
-    <script>
-        // 确保renderMathInElement函数全局可用
-        window.renderMathInElement = window.renderMathInElement || katex.renderMathInElement;
-    </script>
     <!-- 添加Markdown渲染器 -->
     <script src="{{ url_for('static', filename='js/markdown-renderer.js') }}"></script>
+    <!-- 添加数学公式渲染器 -->
+    <script src="{{ url_for('static', filename='js/math-renderer.js') }}"></script>
     <style>
         #loading-indicator {
             text-align: center;
@@ -114,10 +106,29 @@
                     </div>
                 `;
                 
-                // 渲染Markdown和数学公式
+                // 渲染Markdown
                 const descriptionContent = slideDiv.querySelector('.description-content');
                 if (descriptionContent && window.markdownRenderer) {
                     window.markdownRenderer.renderMarkdown(slide.description, descriptionContent);
+                    
+                    // 渲染数学公式
+                    if (window.mathRenderer) {
+                        // 等待Markdown渲染完成后再渲染数学公式
+                        setTimeout(function() {
+                            if (descriptionContent.dataset.mathRendered !== 'true') {
+                                renderMathInElement(descriptionContent, {
+                                    delimiters: [
+                                        {left: '$$', right: '$$', display: true},
+                                        {left: '$', right: '$', display: false},
+                                        {left: '\\(', right: '\\)', display: false},
+                                        {left: '\\[', right: '\\]', display: true}
+                                    ],
+                                    throwOnError: false
+                                });
+                                descriptionContent.dataset.mathRendered = 'true';
+                            }
+                        }, 100);
+                    }
                 }
                 
                 return slideDiv;

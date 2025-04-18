@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>分析结果 - 幻灯片翻译与讲解</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- 添加KaTeX CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <!-- 添加Marked.js -->
     <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
-    <!-- 添加KaTeX JS -->
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
     <!-- 添加Markdown渲染器 -->
     <script src="{{ url_for('static', filename='js/markdown-renderer.js') }}"></script>
+    <!-- 添加数学公式渲染器 -->
+    <script src="{{ url_for('static', filename='js/math-renderer.js') }}"></script>
 </head>
 <body>
     <div class="container">
@@ -50,6 +47,11 @@
             // 处理所有Markdown内容
             if (window.markdownRenderer) {
                 window.markdownRenderer.processAllMarkdownElements();
+            }
+            
+            // 处理所有数学公式
+            if (window.mathRenderer) {
+                window.mathRenderer.processAllMathElements();
             }
         });
     </script>

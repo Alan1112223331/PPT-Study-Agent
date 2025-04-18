@@ -10,13 +10,13 @@ mimetypes.add_type('application/vnd.ms-powerpoint', '.ppt')
 mimetypes.add_type('application/pdf', '.pdf')
 
 # 从环境变量读取API密钥
-XAI_API_KEY = os.getenv("XAI_API_KEY")
-if not XAI_API_KEY:
-    raise ValueError("环境变量 XAI_API_KEY 未设置")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise ValueError("环境变量 OPENAI_API_KEY 未设置")
 
 # 初始化API客户端
 client = OpenAI(
-    api_key=XAI_API_KEY,
+    api_key=OPENAI_API_KEY,
     base_url="https://api.x.ai/v1",
 )
 
@@ -100,10 +100,12 @@ def analyze_image(image_path, context=None):
 **整体输出规范：**
 
 *   **Markdown 格式：** 使用 Markdown 语法（如标题、列表、`*斜体*`、`**加粗**`、代码块等）使报告清晰美观。
-*   **数学公式：**
-    *   行内公式使用 `$公式内容$`。
-    *   块级公式使用 `$$公式内容$$`。
-    *   保留原始 LaTeX 格式，无需转述。
+* 数学公式规范要求
+* 1. 所有数学公式必须使用LaTeX语法
+* 2. 行内公式使用$...$包裹
+* 3. 块级公式使用$$...$$包裹
+* 4. 避免在公式中使用特殊字符，如需使用请转义
+* 5. 确保公式语法正确，避免渲染错误
 *   **分隔：** 各主要部分（【】标题标识的部分）之间使用 `---` 分隔线，增加视觉区分度。
 *   **语言：** 回答语言为**简体中文**。
 *   **风格：** 整体风格应简洁、专业，同时**易于学生阅读和理解**。

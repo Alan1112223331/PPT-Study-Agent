@@ -264,6 +264,10 @@ header p {
     padding: 0.5em 0;
 }
 
+mjx-container {
+    overflow-x: auto;
+}
+
 /* 页脚样式 */
 footer {
     text-align: center;
@@ -271,6 +275,17 @@ footer {
     padding: 20px 0;
     color: #7f8c8d;
     border-top: 1px solid #eee;
+}
+
+/* 数学公式样式 */
+.katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.5em 0;
+}
+
+mjx-container {
+    overflow-x: auto;
 }
 
 /* 响应式设计 */
