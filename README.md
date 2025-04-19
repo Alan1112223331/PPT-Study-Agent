@@ -42,8 +42,8 @@ PPT-Study-Agent是一个基于视觉语言模型(VLM)的幻灯片翻译与讲解
 1. 克隆仓库
 
 ```bash
-git clone [仓库地址]
-cd pptstudy
+git clone https://github.com/Alan1112223331/PPT-Study-Agent.git
+cd PPT-Study-Agent
 ```
 
 2. 安装依赖
@@ -77,7 +77,7 @@ sudo fc-cache -f -v
 4. 设置环境变量
 
 ```bash
-# Linux/macOS系统
+# Linux系统
 export OPENAI_API_KEY=your_api_key_here
 ```
 
