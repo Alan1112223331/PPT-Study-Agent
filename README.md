@@ -89,7 +89,7 @@ export OPENAI_API_KEY=your_api_key_here
 python3 app.py
 ```
 
-2. 在浏览器中访问 `http://localhost:5000`
+2. 在浏览器中访问 `http://localhost:2230`
 
 3. 上传PPT、PPTX或PDF文件
 

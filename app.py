@@ -224,7 +224,8 @@ def view_results(session_id):
     if session_id not in processing_tasks:
         return "会话不存在或已过期", 404
         
-    return render_template('realtime_view.html', session_id=session_id)
+    # 重定向到首页，我们的新index.html会根据URL路径自动显示结果
+    return redirect(url_for('index'))
 
 @app.route('/results/<session_id>/images/<filename>')
 def get_image(session_id, filename):
@@ -234,4 +235,4 @@ def get_image(session_id, filename):
     return send_from_directory(images_dir, filename)
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True, host="0.0.0.0", port=2230)
