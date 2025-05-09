@@ -17,7 +17,7 @@ if not OPENAI_API_KEY:
 # 初始化API客户端
 client = OpenAI(
     api_key=OPENAI_API_KEY,
-    base_url="https://api.siliconflow.cn/v1",
+    base_url="https://axa.alan-m-12.top/api",
 )
 
 def encode_image(image_path):
@@ -55,7 +55,7 @@ def analyze_image(image_path, context=None):
 
 *   **检查原文语言：**
     *   如果幻灯片内容**包含任何非中文文本**（如英文、日文、公式符号等），请在此处提供**完整、通顺、准确的中文翻译**。翻译应力求自然流畅，符合中文表达习惯，像一篇完整的段落或列表，而不是逐行生硬对应。**请勿在此部分使用项目符号（点号）进行逐条翻译，也不要在译文中直接括号标注英文。**请对关键词进行**加粗**处理，以便学生阅读。
-    *   如果幻灯片原文**完全是中文**，请在此处注明："幻灯片原文为中文，无需翻译。"
+    *   如果幻灯片原文**完全是中文**，请在此处注明：“幻灯片原文为中文，无需翻译。”
 
 *   **格式要求：** 本部分内容单独成段展示，保持原文的段落或列表结构（如果原文有）。
 
@@ -68,7 +68,7 @@ def analyze_image(image_path, context=None):
     *   使用列表格式，每行一个术语。
     *   格式为：`中文术语 (English Term)` 或 `英文术语 (中文翻译)`。
     *   **仅列出术语对照，不加额外解释。**
-    *   如果无需翻译或没有明显关键术语，则注明："无关键术语需要单独列出。"
+    *   如果无需翻译或没有明显关键术语，则注明：“无关键术语需要单独列出。”
 
 ---
 
@@ -139,7 +139,7 @@ def analyze_image(image_path, context=None):
     # 调用API
     try:
         completion = client.chat.completions.create(
-            model="Qwen/Qwen2.5-VL-32B-Instruct",
+            model="X.grok-2-vision-1212",
             messages=messages,
             temperature=0.2,
         )
