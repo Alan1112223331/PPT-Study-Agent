@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数学库使用状态诊断</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .status-card {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-good { border-left-color: #27ae60; }
+        .status-bad { border-left-color: #e74c3c; }
+        .code {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>数学库使用状态诊断</h1>
+    
+    <div id="diagnostic-results"></div>
+    
+    <script src="/static/js/math-renderer.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const results = document.getElementById('diagnostic-results');
+            
+            function addResult(title, content, isGood = true) {
+                const card = document.createElement('div');
+                card.className = `status-card ${isGood ? 'status-good' : 'status-bad'}`;
+                card.innerHTML = `<h3>${title}</h3><div>${content}</div>`;
+                results.appendChild(card);
+            }
+            
+            // 检查当前配置的数学引擎
+            const currentEngine = localStorage.getItem('mathEngine') || 'KaTeX';
+            addResult('当前配置的数学引擎', `<strong>${currentEngine}</strong>`);
+            
+            // 检查KaTeX状态
+            setTimeout(() => {
+                const katexLoaded = typeof katex !== 'undefined';
+                const autoRenderLoaded = typeof renderMathInElement !== 'undefined';
+                
+                addResult('KaTeX状态', `
+                    <div>主库加载: ${katexLoaded ? '✅ 已加载' : '❌ 未加载'}</div>
+                    <div>自动渲染插件: ${autoRenderLoaded ? '✅ 已加载' : '❌ 未加载'}</div>
+                    ${katexLoaded ? `<div class="code">版本: ${katex.version || '未知'}</div>` : ''}
+                `, katexLoaded && autoRenderLoaded);
+                
+                // 检查MathJax状态
+                const mathjaxLoaded = typeof MathJax !== 'undefined';
+                const mathjaxReady = mathjaxLoaded && MathJax.typesetPromise;
+                
+                addResult('MathJax状态', `
+                    <div>主库加载: ${mathjaxLoaded ? '✅ 已加载' : '❌ 未加载'}</div>
+                    <div>渲染功能可用: ${mathjaxReady ? '✅ 可用' : '❌ 不可用'}</div>
+                    ${mathjaxLoaded && MathJax.version ? `<div class="code">版本: ${MathJax.version}</div>` : ''}
+                `, mathjaxLoaded && mathjaxReady);
+                
+                // 实际使用的引擎
+                let actualEngine = '无';
+                if (currentEngine === 'KaTeX' && katexLoaded && autoRenderLoaded) {
+                    actualEngine = 'KaTeX (正常工作)';
+                } else if (currentEngine === 'MathJax' && mathjaxLoaded && mathjaxReady) {
+                    actualEngine = 'MathJax (正常工作)';
+                } else if (currentEngine === 'KaTeX' && (!katexLoaded || !autoRenderLoaded)) {
+                    actualEngine = 'KaTeX (配置但未正常加载)';
+                } else if (currentEngine === 'MathJax' && (!mathjaxLoaded || !mathjaxReady)) {
+                    actualEngine = 'MathJax (配置但未正常加载)';
+                }
+                
+                addResult('实际使用的引擎', `<strong>${actualEngine}</strong>`, actualEngine.includes('正常工作'));
+                
+                // 测试公式渲染
+                addResult('公式渲染测试', `
+                    <div>测试公式: $E = mc^2$</div>
+                    <div>显示效果:</div>
+                    <div class="description-content" style="margin: 10px 0; padding: 10px; background: #f8f9fa;">
+                        这是一个测试公式：$E = mc^2$，以及块级公式：$$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$
+                    </div>
+                `);
+                
+                // 触发数学公式渲染
+                setTimeout(() => {
+                    if (typeof processAllMathElements === 'function') {
+                        processAllMathElements();
+                    }
+                }, 500);
+                
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

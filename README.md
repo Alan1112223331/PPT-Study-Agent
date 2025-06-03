@@ -76,9 +76,12 @@ sudo fc-cache -f -v
 
 4. 设置环境变量
 
+#### 修改config.ini
+
 ```bash
-# Linux系统
-export OPENAI_API_KEY=your_api_key_here
+api_key = your_api_key_here
+base_url = your_url_here
+model = vlm_model_id
 ```
 
 ## 使用方法
@@ -86,7 +89,7 @@ export OPENAI_API_KEY=your_api_key_here
 1. 启动应用
 
 ```bash
-python3 app.py
+./start.sh
 ```
 
 2. 在浏览器中访问 `http://localhost:2230`
@@ -142,7 +145,7 @@ A: 可以尝试减小文件大小，或者调整代码中的DPI参数以生成�
 ## TODO list
 
 - [x] 完成公式显示的支持
-- [ ] 优化文件保存系统
+- [x] 优化文件保存系统
 - [ ] 添加多用户管理系统
 
 ## License

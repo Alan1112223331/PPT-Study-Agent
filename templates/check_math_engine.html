@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>检查当前数学渲染引擎</title>
+</head>
+<body>
+    <h1>当前数学渲染引擎检查</h1>
+    <div id="result"></div>
+    
+    <script>
+        const mathEngine = localStorage.getItem('mathEngine') || 'KaTeX (默认)';
+        const resultDiv = document.getElementById('result');
+        
+        resultDiv.innerHTML = `
+            <h2>当前配置：</h2>
+            <p><strong>数学渲染引擎：</strong> ${mathEngine}</p>
+            <p><strong>localStorage值：</strong> ${localStorage.getItem('mathEngine') || '未设置(使用默认)'}</p>
+            
+            <h2>库加载状态：</h2>
+            <p><strong>KaTeX主库：</strong> ${typeof katex !== 'undefined' ? '✅ 已加载' : '❌ 未加载'}</p>
+            <p><strong>KaTeX渲染器：</strong> ${typeof renderMathInElement !== 'undefined' ? '✅ 已加载' : '❌ 未加载'}</p>
+            <p><strong>MathJax：</strong> ${typeof MathJax !== 'undefined' ? '✅ 已加载' : '❌ 未加载'}</p>
+            
+            <h2>实际PPT分析时的渲染流程：</h2>
+            <ol>
+                <li>首先尝试使用 math-renderer.js 中的渲染器</li>
+                <li>如果不可用，回退到直接使用 KaTeX</li>
+                <li>渲染延迟：300ms（确保Markdown先渲染完成）</li>
+                <li>支持的公式格式：$...$ $$...$$ \\(...\\) \\[...\\]</li>
+            </ol>
+            
+            <button onclick="location.reload()">刷新检查</button>
+        `;
+    </script>
+</body>
+</html>

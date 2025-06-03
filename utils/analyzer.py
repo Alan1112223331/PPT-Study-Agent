@@ -1,23 +1,33 @@
 import os
 import json
 import base64
+import sys
 from openai import OpenAI
 import mimetypes
+
+# 添加项目根目录到路径
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from config_manager import config
 
 mimetypes.add_type('image/png', '.png')
 mimetypes.add_type('application/vnd.openxmlformats-officedocument.presentationml.presentation', '.pptx')
 mimetypes.add_type('application/vnd.ms-powerpoint', '.ppt')
 mimetypes.add_type('application/pdf', '.pdf')
 
-# 从环境变量读取API密钥
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    raise ValueError("环境变量 OPENAI_API_KEY 未设置")
+# 获取API配置
+api_config = config.get_api_config()
+
+# 验证API配置
+if not api_config['api_key'] or api_config['api_key'] == 'your_api_key_here':
+    raise ValueError("API密钥未配置，请在 config.ini 中设置 [api] api_key 或设置环境变量 OPENAI_API_KEY")
 
 # 初始化API客户端
 client = OpenAI(
-    api_key=OPENAI_API_KEY,
-    base_url="https://axa.alan-m-12.top/api",
+    api_key=api_config['api_key'],
+    base_url=api_config['base_url'],
+    timeout=api_config['timeout'],
+    max_retries=api_config['max_retries'],
 )
 
 def encode_image(image_path):
@@ -100,12 +110,16 @@ def analyze_image(image_path, context=None):
 **整体输出规范：**
 
 *   **Markdown 格式：** 使用 Markdown 语法（如标题、列表、`*斜体*`、`**加粗**`、代码块等）使报告清晰美观。
-* 数学公式规范要求
-* 1. 所有数学公式必须使用LaTeX语法
-* 2. 行内公式使用$...$包裹
-* 3. 块级公式使用$$...$$包裹
-* 4. 避免在公式中使用特殊字符，如需使用请转义
-* 5. 确保公式语法正确，避免渲染错误
+
+**数学公式规范要求：**
+1. **公式格式**：所有数学公式必须使用标准LaTeX语法
+2. **行内公式**：使用单个美元符号包裹，如 `$E = mc^2$`
+3. **块级公式**：使用双美元符号包裹，如 `$$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$`
+4. **矩阵表示**：使用 `\\begin{bmatrix}...\\end{bmatrix}` 格式
+5. **特殊符号**：希腊字母用 `\\alpha, \\beta, \\gamma` 等，上下标用 `^{}` 和 `_{}`
+6. **转义字符**：反斜杠需双写，如 `\\\\` 表示换行
+7. **避免错误**：检查括号配对，确保语法完整正确
+
 *   **分隔：** 各主要部分（【】标题标识的部分）之间使用 `---` 分隔线，增加视觉区分度。
 *   **语言：** 回答语言为**简体中文**。
 *   **风格：** 整体风格应简洁、专业，同时**易于学生阅读和理解**。
@@ -139,9 +153,9 @@ def analyze_image(image_path, context=None):
     # 调用API
     try:
         completion = client.chat.completions.create(
-            model="X.grok-2-vision-1212",
+            model=api_config['model'],
             messages=messages,
-            temperature=0.2,
+            temperature=api_config['temperature'],
         )
         
         # 返回生成的描述
@@ -156,6 +170,10 @@ def analyze_images_realtime(image_paths, output_dir, callback=None):
     
     descriptions = []
     context = ""
+    
+    # 获取处理配置
+    processing_config = config.get_processing_config()
+    max_context_slides = processing_config['max_context_slides']
     
     # 调整图像路径，确保使用统一格式
     sorted_image_paths = sorted([os.path.abspath(p) for p in image_paths])
@@ -178,8 +196,8 @@ def analyze_images_realtime(image_paths, output_dir, callback=None):
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump({"description": description}, f, ensure_ascii=False, indent=2)
         
-        # 更新上下文，只保留最近5张幻灯片的描述
-        context_entries = descriptions[-5:] if len(descriptions) > 5 else descriptions
+        # 更新上下文，只保留最近N张幻灯片的描述
+        context_entries = descriptions[-max_context_slides:] if len(descriptions) > max_context_slides else descriptions
         context = "\n\n".join([f"幻灯片 {j+1}: {desc}" for j, desc in enumerate(context_entries, i-len(context_entries)+1)])
         
         # 调用回调函数通知进度更新
